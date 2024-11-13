@@ -6,7 +6,14 @@
 #include <iostream>
 #include <string>
 
-class PmergeMe {
+class PmergeMe
+{
+private:
+    std::vector<int> sequence;
+    static std::vector<int> jacobsthalSequence(int n);
+    template <typename T>
+    void mergeInsertSort(T& seq);
+
 public:
     PmergeMe(const std::vector<int>& sequence);
     void sortWithVector();
@@ -15,13 +22,9 @@ public:
     void displaySequence(const std::deque<int>& sequence, const std::string& msg);
     void displayTime(double time, const std::string& containerType);
 
-private:
-    std::vector<int> sequence;
-    std::vector<int> jacobsthalSequence(int n);
-    template <typename T>
-    void mergeInsertSort(T& seq);
-    // void mergeInsertSort(std::vector<int>& seq);
-    // void mergeInsertSort(std::deque<int>& seq);
+    int Jacobsthal(int n);
+    std::vector<unsigned long> jacobIndexGeneratorVector(std::vector<int> &jacobsthals, int size);
+    int returnIndexVector(std::vector<int> &v, int value);
 };
 
 #endif
