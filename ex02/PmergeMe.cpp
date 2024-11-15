@@ -84,6 +84,10 @@ int PmergeMe::returnIndexVector(std::vector<int> &v, int value){
 }
 
 std::vector<unsigned long> PmergeMe::jacobIndexGeneratorVector(std::vector<int> &jacobsthals, int size){
+    // std::cout << "jacobsthals" << std::endl;
+    // for (size_t i = 0; i < jacobsthals.size(); i++)
+    //     std::cout << jacobsthals[i] << " ";
+    // std::cout << std::endl;
     std::vector<unsigned long> jacobsthals_indexed;
     int jacob = 0;
     for (size_t i = 0; i < jacobsthals.size(); i++)
@@ -109,10 +113,10 @@ int PmergeMe::Jacobsthal(int n)
 {
     if (n == 0)
         return 0;
- 
+
     if (n == 1)
         return 1;
- 
+
     return Jacobsthal(n - 1) + 2 * Jacobsthal(n - 2);
 }
 
@@ -120,11 +124,15 @@ template <typename T>
 void PmergeMe::mergeInsertSort(T& seq)
 {
     if (seq.size() < 2)
-        return ; // Base case for trivial sorting
+        return ;
 
     // Step 1: Pair elements and sort each pair
-    std::vector<std::pair<int, int> > pairs; // Add a space between consecutive right angle brackets
-    for (size_t i = 0; i < seq.size() - 1; i += 2)
+    std::vector<std::pair<int, int> > pairs;
+    // std::cout 
+    int struggle = (seq.size() % 2 != 0) ? seq.back() : -1;
+    if (struggle != -1)
+        seq.pop_back();
+    for (size_t i = 0; i < seq.size(); i += 2)
     {
         if (seq[i] > seq[i + 1])
             pairs.push_back(std::make_pair(seq[i], seq[i + 1]));
@@ -132,23 +140,22 @@ void PmergeMe::mergeInsertSort(T& seq)
             pairs.push_back(std::make_pair(seq[i + 1], seq[i]));
     }
     // handle odd element if it exist (the "struggle" element)
-    int struggle = (seq.size() % 2 != 0) ? seq.back() : -1;
 
     // Step 2: Sort pairs by the larger element (first in pair)
     std::sort(pairs.begin(), pairs.end(), comparePairs);
 
     // Step 3: Separate into B and S sequences
-    T B; // Sorted larger elements
+    T L; // Sorted larger elements
     T S; // Unsorted smaller elements
     for (size_t i = 0; i < pairs.size(); i++)
     {
-        B.push_back(pairs[i].first);
+        L.push_back(pairs[i].first);
         S.push_back(pairs[i].second);
     }
 
     // std::cout << "Sorted larger elements" << std::endl;
-    // for (size_t i = 0; i < B.size(); i++)
-    //     std::cout << B[i] << " ";
+    // for (size_t i = 0; i < L.size(); i++)
+    //     std::cout << L[i] << " ";
     // std::cout << std::endl;
     // std::cout << "Unsorted smaller elements" << std::endl;
     // for (size_t i = 0; i < S.size(); i++)
@@ -160,7 +167,7 @@ void PmergeMe::mergeInsertSort(T& seq)
         std::vector<int> jacobsthals;
         std::vector<unsigned long> jacobsthals_indexed;
         unsigned long jacob = 0;
-        for (size_t i = 2; i < S.size() + B.size(); i++)
+        for (size_t i = 2; i < S.size() + L.size(); i++)
         {
             jacob = Jacobsthal(i);
             // std::cout << "jacob = " << jacob << std::endl;
@@ -172,13 +179,13 @@ void PmergeMe::mergeInsertSort(T& seq)
             jacobsthals.push_back(jacob);
         }
         jacobsthals_indexed = jacobIndexGeneratorVector(jacobsthals, S.size());
-        std::cout << "jacobsthals_indexed = " << jacobsthals_indexed.size()<< std::endl;
-        for (size_t i = 0; i < jacobsthals_indexed.size(); i++)
-            std::cout << jacobsthals_indexed[i] << " ";
-        std::cout << std::endl;
+        // std::cout << "jacobsthals_indexed = " << jacobsthals_indexed.size()<< std::endl;
+        // for (size_t i = 0; i < jacobsthals_indexed.size(); i++)
+        //     std::cout << jacobsthals_indexed[i] << " ";
+        // std::cout << std::endl;
 
         //step four
-        B.insert(B.begin(), S[0]);
+        L.insert(L.begin(), S[0]);
 
         //step five
         int last_size = 0;
@@ -186,26 +193,27 @@ void PmergeMe::mergeInsertSort(T& seq)
         {
             if (jacobsthals_indexed[i] <= S.size())
             {
-                std::cout << "returnIndexVector = " << returnIndexVector(jacobsthals,jacobsthals_indexed[i]) << std::endl;
-                if (pow(2, returnIndexVector(jacobsthals,jacobsthals_indexed[i])) - 1 > B.size())
-                   last_size = B.size();
+                // std::cout << "returnIndexVector = " << returnIndexVector(jacobsthals,jacobsthals_indexed[i]) << std::endl;
+                if (pow(2, returnIndexVector(jacobsthals,jacobsthals_indexed[i])) - 1 > L.size())
+                    last_size = L.size();
                 else
                     last_size = pow(2, returnIndexVector(jacobsthals,jacobsthals_indexed[i])) - 1;
-                std::cout << "last_size = " << last_size << std::endl;
-                B.insert(std::lower_bound(B.begin(), B.begin() + last_size, S[jacobsthals_indexed[i] - 1]), S[jacobsthals_indexed[i] - 1]);
+                // std::cout << "last_size = " << last_size << std::endl;
+                L.insert(std::lower_bound(L.begin(), L.begin() + last_size, S[jacobsthals_indexed[i] - 1]), S[jacobsthals_indexed[i] - 1]);
             }
         }
     } else {
-        B.insert(std::lower_bound(B.begin(), B.end(), S[0]), S[0]);
+        std::cout << "here" << std::endl;
+        L.insert(std::lower_bound(L.begin(), L.end(), S[0]), S[0]);
     }
 
     // Step 5: Insert the "struggle" element if it exists
     if (struggle != -1)
     {
-        typename T::iterator pos = std::lower_bound(B.begin(), B.end(), struggle);
-        B.insert(pos, struggle);
+        typename T::iterator pos = std::lower_bound(L.begin(), L.end(), struggle);
+        L.insert(pos, struggle);
     }
 
     // Step 6: copy sorted elements back to the original sequence
-    seq = B;
+    seq = L;
 }

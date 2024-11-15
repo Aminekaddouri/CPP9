@@ -10,7 +10,7 @@ int stringToInt(const std::string& str)
     std::stringstream ss(str);
     int num;
     ss >> num;
-    if (ss.fail())
+    if (ss.fail() || !ss.eof())
         throw std::invalid_argument("Invalid integer string: " + str);
     return (num);
 }
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
         for (int i = 1; i < argc; i++)
         {
             int num = stringToInt(argv[i]);
-            if (num <= 0)
+            if (num < 0)
                 throw std::invalid_argument("Error: Only positive integers are allowed.");
             sequence.push_back(num);
         }
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 
         // Display "Before" sequence
         std::cout << "Before:";
-        for (size_t i = 0; i < sequence.size() - 1; i++)
+        for (size_t i = 0; i < sequence.size(); i++)
             std::cout << " " << sequence[i];
         std::cout << std::endl;
 
